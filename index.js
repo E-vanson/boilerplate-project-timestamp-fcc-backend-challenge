@@ -27,21 +27,54 @@ app.get("/api/hello", function (req, res) {
 });
 
 app.get("/api/:time",(req,res)=>{
-const parameter = req.params.time;
-const date = new Date(parameter);
-if(isNaN(parameter)){
-  console.log(parameter);
-  //res.send(parameter + " param " + date.toString() );
- const unix = date.getTime();
-  res.status(200).json({unix: unix, utc:date.toUTCString()});
-}
+// const parameter = req.params.time;
+// const date = new Date(parameter);
+// if(isNaN(parameter)){
+//   console.log(parameter);
+//   //res.send(parameter + " param " + date.toString() );
+//  const unix = date.getTime();
+//   res.status(200).json({unix: unix, utc:date.toUTCString()});
+// }
 
-if(!isNaN(parameter) && parameter.length === 13){
-  const dateString = new Date(parameter / 1000);
-  const utc = dateString.toUTCString();
-  res.status(200).json({unix: parameter, utc:utc});
-}
-res.json({error:"invalid date"});
+// if(!isNaN(parameter) && parameter.length === 13){
+//   const dateString = new Date(parameter / 1000);
+//   const utc = dateString.toUTCString();
+//   res.status(200).json({unix: parameter, utc:utc});
+// }
+// res.json({error:"invalid date"});
+let inputDate;
+
+  try {
+    // Check if date parameter is provided
+    if (req.params.date) {
+      const dateString = req.params.date;
+
+      // Check if it's a valid Unix timestamp
+      if (!isNaN(dateString) && dateString.length === 13) {
+        inputDate = new Date(parseInt(dateString));
+      } else {
+        inputDate = new Date(dateString);
+      }
+    } else {
+      // If no date parameter provided, use current time
+      inputDate = new Date();
+    }
+
+    // Check if the input date is invalid
+    if (isNaN(inputDate.getTime())) {
+      throw new Error('Invalid Date');
+    }
+
+    // Format output
+    const unixTimestamp = inputDate.getTime();
+    const utcDate = inputDate.toUTCString();
+
+    // Return JSON response
+    res.json({ unix: unixTimestamp, utc: utcDate });
+  } catch (error) {
+    // Handle errors
+    res.status(400).json({ error: 'Invalid Date' });
+  }
 })
 
 
