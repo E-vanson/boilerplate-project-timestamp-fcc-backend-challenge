@@ -13,6 +13,8 @@ app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 20
 // http://expressjs.com/en/starter/static-files.html
 app.use(express.static('public'));
 
+//app.use(express.json());
+
 // http://expressjs.com/en/starter/basic-routing.html
 app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
@@ -25,11 +27,21 @@ app.get("/api/hello", function (req, res) {
 });
 
 app.get("/api/:time",(req,res)=>{
-  const {time} = req.params;
-  console.log(time);
- console.log(new Date(time).toString());
- const date = new Date(time).toString();
-res.json({"utc":date});
+const parameter = req.params.time;
+const date = new Date(parameter);
+if(isNaN(parameter)){
+  console.log(parameter);
+  //res.send(parameter + " param " + date.toString() );
+ const unix = date.getTime();
+  res.status(200).json({unix: unix, utc:date.toUTCString()});
+}
+
+if(!isNaN(parameter) && parameter.length === 13){
+  const dateString = new Date(parameter / 1000);
+  const utc = dateString.toUTCString();
+  res.status(200).json({unix: parameter, utc:utc});
+}
+res.json({error:"invalid date"});
 })
 
 
